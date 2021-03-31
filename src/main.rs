@@ -1,8 +1,10 @@
-use std::fs;
 use serde::Deserialize;
+use std::fs;
 
 #[derive(Debug, Deserialize)]
-struct RotkiAll{
+struct RotkiAll {
+    #[serde(rename = "type")]
+    action: String,
     location: String,
     paid_asset: String,
     paid_in_asset: Option<String>,
@@ -17,18 +19,15 @@ struct RotkiAll{
     taxable_bought_cost_in_EUR: Option<String>,
     cost_basis: Option<String>,
     total_bought_cost_in_EUR: Option<String>,
-    total_received_in_EUR: Option<String>
+    total_received_in_EUR: Option<String>,
 }
 
 fn main() {
     let csvf = fs::read_to_string("./raw/all_events.csv");
     let csvu = csvf.unwrap();
     let mut reader = csv::Reader::from_reader(csvu.as_bytes());
-    for record in reader.deserialize(){
+    for record in reader.deserialize() {
         let record: RotkiAll = record.unwrap();
-        println!(
-            "{:?}",
-            record
-        );
+        println!("{:?}", record);
     }
 }
