@@ -24,11 +24,11 @@ fn processRotkiAll() {
 }
 
 fn findTotalEurDeposits(dir_path: &String) {
-    // for item in dirs{
-    //     if
-    // }
-    // let types = getDirContentWithTypes(dir_path);
     let types = getFoldersInDir(dir_path);
+    /* 
+        update map with key to prevent duplicates
+        calculate total deposited EUR
+    */
     println!("{:?}", types)
 }
 
