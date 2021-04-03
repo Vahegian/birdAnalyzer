@@ -1,14 +1,15 @@
-use std::{fs::{self, ReadDir}, process};
+use std::fs;
 
-use crate::types::DirType;
+use crate::types::{AssetMovements, DirType};
 
 pub fn getDirContentWithTypes(dir_path: &String) -> Vec<DirType> {
     let dirs = fs::read_dir(dir_path);
     let dirs = match dirs {
         Ok(content) => content,
         Err(error) => {
-            println!("Error at the path {}, {:?}", dir_path, error) ;
-            process::exit(0)
+            println!("Error at the path {}, {:?}", dir_path, error);
+            return vec![];
+            // process::exit(0)
         }
     };
     let names = dirs
@@ -33,16 +34,49 @@ pub fn getDirContentWithTypes(dir_path: &String) -> Vec<DirType> {
     names
 }
 
-pub fn getFoldersInDir(dir_path: &String) -> Vec<String>{
+pub fn getFoldersInDir(dir_path: &String) -> Vec<String> {
     let file_types = getDirContentWithTypes(dir_path);
-    let mut dirs:Vec<String> = vec![];
-    for file in file_types{
-        if file.isDir{
+    let mut dirs: Vec<String> = vec![];
+    for file in file_types {
+        if file.isDir {
             let mut path = String::from("");
             path.push_str(dir_path);
-            path.push_str("/"); path.push_str(&file.name);
+            path.push_str("/");
+            path.push_str(&file.name);
             dirs.push(path);
         }
     }
     dirs
+}
+
+// pub fn processRotkiAll() {
+//     let csvf = fs::read_to_string("./raw/all_events.csv");
+//     let csvu = csvf.unwrap();
+//     let mut reader = csv::Reader::from_reader(csvu.as_bytes());
+//     let mut data: Vec<Box<RotkiAll>> = vec![];
+//     for record in reader.deserialize() {
+//         // let mut record: RotkiAll = record.unwrap();
+//         data.push(Box::new(record.unwrap()));
+//         // println!("{:?}", record);
+//     }
+
+//     // let d = data[0];
+
+//     println!("{:?}", data[0].net_profit_or_loss.as_ref().unwrap());
+// }
+
+pub fn getRotkiAsset_movements(dir_path: &String) -> Vec<Box<AssetMovements>> {
+    let mut full_path = String::from("");
+    full_path.push_str(dir_path);
+    full_path.push_str("/asset_movements.csv");
+    let csvf = fs::read_to_string(full_path);
+    let csvu = csvf.unwrap();
+    let mut reader = csv::Reader::from_reader(csvu.as_bytes());
+    let mut data: Vec<Box<AssetMovements>> = vec![];
+    for record in reader.deserialize() {
+        data.push(Box::new(record.unwrap()));
+
+    }
+    
+    data
 }

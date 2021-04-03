@@ -1,35 +1,39 @@
 mod common;
 mod types;
 use common::{getDirContentWithTypes, getFoldersInDir};
-use std::{
-    fs::{self, ReadDir},
-    path::{Path, PathBuf},
-};
-use types::{DirType, RotkiAll};
+use types::AssetMovements;
+use std::{fs::{self, ReadDir}, path::{Path, PathBuf}};
 
-fn processRotkiAll() {
-    let csvf = fs::read_to_string("./raw/all_events.csv");
-    let csvu = csvf.unwrap();
-    let mut reader = csv::Reader::from_reader(csvu.as_bytes());
-    let mut data: Vec<Box<RotkiAll>> = vec![];
-    for record in reader.deserialize() {
-        // let mut record: RotkiAll = record.unwrap();
-        data.push(Box::new(record.unwrap()));
-        // println!("{:?}", record);
+fn getTotalEurDepCoinbase(am: &Vec<Box<AssetMovements>>) -> u32{
+    let mut totalEur: u32 = 0;
+    for item in am{
+        if item.action == "deposit" && item.exchange == "coinbasepro"{
+            match &item.fee_in_EUR {
+                Some(o) =>{
+                        totalEur+=o.parse::<u32>().expect("error parsing")
+                }
+                None => {println!("no value found")}
+            }
+        }
     }
 
-    // let d = data[0];
-
-    println!("{:?}", data[0].net_profit_or_loss.as_ref().unwrap());
+    totalEur
 }
 
 fn findTotalEurDeposits(dir_path: &String) {
     let types = getFoldersInDir(dir_path);
+    
+    println!("{:?}", types);
+
+    for path in types{
+        let am = common::getRotkiAsset_movements(&path);
+        println!("{:?} {}", &am, getTotalEurDepCoinbase(&am));
+    }
     /* 
         update map with key to prevent duplicates
         calculate total deposited EUR
     */
-    println!("{:?}", types)
+   
 }
 
 fn main() {
