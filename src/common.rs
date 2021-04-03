@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::types::{AssetMovements, DirType};
+use crate::types::{AssetMovements, DirType, RotkiAll};
 
 pub fn getDirContentWithTypes(dir_path: &String) -> Vec<DirType> {
     let dirs = fs::read_dir(dir_path);
@@ -49,21 +49,21 @@ pub fn getFoldersInDir(dir_path: &String) -> Vec<String> {
     dirs
 }
 
-// pub fn processRotkiAll() {
-//     let csvf = fs::read_to_string("./raw/all_events.csv");
-//     let csvu = csvf.unwrap();
-//     let mut reader = csv::Reader::from_reader(csvu.as_bytes());
-//     let mut data: Vec<Box<RotkiAll>> = vec![];
-//     for record in reader.deserialize() {
-//         // let mut record: RotkiAll = record.unwrap();
-//         data.push(Box::new(record.unwrap()));
-//         // println!("{:?}", record);
-//     }
+pub fn processRotkiAll(dir_path: &String) -> Vec<Box<RotkiAll>> {
+    let mut full_path = String::from("");
+    full_path.push_str(dir_path);
+    full_path.push_str("/all_events.csv");
+    let csvf = fs::read_to_string(full_path);
+    let csvu = csvf.unwrap();
+    let mut reader = csv::Reader::from_reader(csvu.as_bytes());
+    let mut data: Vec<Box<RotkiAll>> = vec![];
+    for record in reader.deserialize() {
+        data.push(Box::new(record.unwrap()));
 
-//     // let d = data[0];
-
-//     println!("{:?}", data[0].net_profit_or_loss.as_ref().unwrap());
-// }
+    }
+    
+    data
+}
 
 pub fn getRotkiAsset_movements(dir_path: &String) -> Vec<Box<AssetMovements>> {
     let mut full_path = String::from("");
@@ -77,6 +77,6 @@ pub fn getRotkiAsset_movements(dir_path: &String) -> Vec<Box<AssetMovements>> {
         data.push(Box::new(record.unwrap()));
 
     }
-    
+
     data
 }

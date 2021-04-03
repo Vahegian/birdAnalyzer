@@ -8,7 +8,7 @@ pub struct RotkiAll {
     pub paid_asset: String,
     pub paid_in_asset: Option<String>,
     pub taxable_amount: Option<String>,
-    pub received_asset: Option<String>,
+    pub received_asset: String,
     pub received_in_asset: Option<String>,
     pub net_profit_or_loss: Option<String>,
     pub time: Option<String>,
