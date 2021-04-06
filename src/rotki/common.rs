@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::types::{AssetMovements, DirType, RotkiAll};
+use crate::worker::types::{AssetMovements, DirType, RotkiAll};
 
 pub fn getDirContentWithTypes(dir_path: &String) -> Vec<DirType> {
     let dirs = fs::read_dir(dir_path);

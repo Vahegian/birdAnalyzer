@@ -1,56 +1,30 @@
-mod common;
-mod types;
-use common::{getDirContentWithTypes, getFoldersInDir};
-use types::{AssetMovements, RotkiAll};
-use std::{fs::{self, ReadDir}, path::{Path, PathBuf}};
+use std::{env, time::{SystemTime, UNIX_EPOCH}};
+extern crate base64;
+use hmac::{Hmac, Mac, NewMac};
+use sha2::Sha256;
+use base64::{encode, decode};
 
-fn getTotalEurDepCoinbase(am: &Vec<Box<RotkiAll>>) -> f32{
-    let mut totalEur: f32 = 0.0;
-    for item in am{
-        if item.received_asset == "ETH"{
-            match &item.total_received_in_EUR {
-                Some(o) =>{
-                    // println!("{}", o)
-                        totalEur+=o.parse::<f32>().expect("error parsing")
-                }
-                None => {println!("no value found")}
-            }
-
-            match &item.total_bought_cost_in_EUR {
-                Some(o) =>{
-                    // println!("{}", o)
-                        totalEur+=o.parse::<f32>().expect("error parsing")
-                }
-                None => {println!("no value found")}
-            }
-        }
-    }
-
-    totalEur
-}
-
-fn findTotalEurDeposits(dir_path: &String) {
-    let types = getFoldersInDir(dir_path);
-    
-    println!("{:?}", types);
-    let mut total = 0.0;
-    for path in types{
-        // let am = common::getRotkiAsset_movements(&path);
-        // println!("{:?} {}", &am, getTotalEurDepCoinbase(&am));
-        let am = common::processRotkiAll(&path);
-        // println!("{}", getTotalEurDepCoinbase(&am));
-        total+=getTotalEurDepCoinbase(&am)
-    }
-
-    println!("{}", total)
-    /* 
-        update map with key to prevent duplicates
-        calculate total deposited EUR
-    */
-   
-}
-
+#[path ="utils/yaml_parser.rs"] mod yaml_parser;
+type hmac_sha256 = Hmac<Sha256>;
+// #[path = "rotki/worker.rs"] mod worker;
 fn main() {
-    let rotki_data = String::from("./raw");
-    findTotalEurDeposits(&rotki_data)
+    // let rotki_data = String::from("./raw");
+    // worker::findTotalEurDeposits(&rotki_data)
+    let args: Vec<String> = env::args().collect();
+    if args.len().ne(&2) {
+        println!("Please specify the path to config.yml file");
+        return;
+    }
+    let deserialized_point = yaml_parser::parse_coinbase_pro(&args[1]);
+    let secretBase64 = decode( deserialized_point.coinbase_pro_secret).expect("error decoding secret");
+    let timeNow = SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs();
+    let message = format!("{}GET{}/accounts", timeNow, deserialized_point.coinbase_pro_api_url);
+    let mut sign = hmac_sha256::new_varkey(&secretBase64).expect("error creating hmac key");
+    sign.update(message.as_bytes());
+
+
+    println!("{:?} {}", encode(&sign.finalize().into_bytes()), timeNow)
 }

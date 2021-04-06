@@ -1,0 +1,4 @@
+coinbase_pro_api: <api-key>
+coinbase_pro_secret: <secret>
+coinbase_pro_passphrase: <phrase>
+coinbase_pro_api_url: https://api.pro.coinbase.com
